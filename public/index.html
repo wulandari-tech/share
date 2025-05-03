@@ -2,169 +2,119 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>FILE SHARE</title>
+  <title>File Share</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script> 
+  <script src="https://kit.fontawesome.com/a2e0d4d8f8.js" crossorigin="anonymous"></script>
   <style>
-    body {
-      background: linear-gradient(to right, #0f172a, #1e293b);
-      color: #f8fafc;
-      font-family: 'Segoe UI', sans-serif;
-    }
-    .glass {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-    }
-    .glow:hover {
-      box-shadow: 0 0 12px #4f46e5;
-    }
-    input[type="text"] {
-      background-color: #333;
-      color: #fff;
-      border: 1px solid #444;
-      padding: 8px;
-      width: 80%;
-    }
-    .btn-share {
-      background-color: #4f46e5;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 5px;
-      text-align: center;
-      cursor: pointer;
-      margin-top: 10px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-    .btn-share:hover {
-      background-color: #4338ca;
-    }
-    .modal-content {
-      background-color: #000;
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 100%;
-    }
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: #f87171;
-      font-size: 20px;
-      cursor: pointer;
-    }
+    .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+    .glow:hover { box-shadow: 0 0 12px #4f46e5; }
   </style>
 </head>
-<body class="p-6 min-h-screen">
-  <h1 class="text-3xl font-bold text-indigo-400 mb-6">DAFTAR FILE TEMPLATE</h1>
+<body class="bg-gray-900 text-white p-6 min-h-screen">
+
+  <h1 class="text-3xl font-bold text-indigo-400 mb-6">Daftar File untuk Diunduh</h1>
+
   <div class="flex space-x-4 mb-6">
-    <div>
-      <label for="fileTypeFilter" class="block text-sm font-medium text-gray-300">Jenis File</label>
-      <select id="fileTypeFilter" class="p-2 rounded text-gray-900">
-        <option value="">Semua Jenis</option>
-        <option value="pdf">PDF</option>
-        <option value="docx">DOCX</option>
-        <option value="application/zip">ZIP</option>
-        <option value="txt">TXT</option>
-      </select>
-    </div>
-    <div>
-      <label for="fileSizeFilter" class="block text-sm font-medium text-gray-300">Ukuran File</label>
-      <select id="fileSizeFilter" class="p-2 rounded text-gray-900">
-        <option value="">Semua Ukuran</option>
-        <option value="1">Kurang dari 1MB</option>
-        <option value="5">1MB - 5MB</option>
-        <option value="10">Lebih dari 5MB</option>
-      </select>
-    </div>
+    <select id="fileTypeFilter" class="p-2 rounded text-black">
+      <option value="">Semua Jenis</option>
+      <option value="pdf">PDF</option>
+      <option value="zip">ZIP</option>
+      <option value="html">HTML</option>
+      <option value="js">JavaScript</option>
+      <option value="py">Python</option>
+    </select>
+    <select id="fileSizeFilter" class="p-2 rounded text-black">
+      <option value="">Semua Ukuran</option>
+      <option value="1">Kurang dari 1MB</option>
+      <option value="5">1MB - 5MB</option>
+      <option value="10">Lebih dari 5MB</option>
+    </select>
   </div>
-<div id="fileList" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- File card akan di-render di sini -->
-  </div>
-  <div id="shareModal" class="hidden fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-    <div class="modal-content">
-      <!-- Tombol Close -->
-      <button id="closeModal" class="modal-close text-right">
-        <i class="fas fa-times"></i>
-      </button>
-      <h3 class="text-lg font-bold text-gray-700 mb-4">Bagikan File</h3>
-      <input id="shareInput" type="text" class="w-full mb-4" readonly />
-      <button id="copyButton" class="btn-share flex items-center justify-center space-x-2">
-        <i class="fas fa-copy"></i>
-        <span>Salin URL</span>
-      </button>
+
+  <div id="fileList" class="space-y-4"></div>
+
+  <div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white text-black p-6 rounded-lg w-96 relative">
+      <button id="closeShare" class="absolute top-2 right-3 text-xl text-gray-600">X</button>
+      <p class="font-medium mb-2">Bagikan tautan:</p>
+      <div class="flex items-center">
+        <input id="shareUrl" class="flex-1 border p-2 rounded-l" readonly />
+        <button onclick="copyShareUrl()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
     </div>
   </div>
 
   <script>
+    const fileList = document.getElementById('fileList')
+    const fileTypeFilter = document.getElementById('fileTypeFilter')
+    const fileSizeFilter = document.getElementById('fileSizeFilter')
+    const shareModal = document.getElementById('shareModal')
+    const shareUrlInput = document.getElementById('shareUrl')
+    const closeShare = document.getElementById('closeShare')
+
     async function loadFiles() {
-      const res = await fetch('/files');
-      const files = await res.json();
-      const fileTypeFilter = document.getElementById('fileTypeFilter').value;
-      const fileSizeFilter = document.getElementById('fileSizeFilter').value;
+      const res = await fetch('/files')
+      const files = await res.json()
+      const typeFilter = fileTypeFilter.value
+      const sizeFilter = fileSizeFilter.value
 
-      const filteredFiles = files.filter(file => {
-        let matchType = true;
-        let matchSize = true;
+      const filtered = files.filter(f => {
+        let matchType = !typeFilter || f.filetype.toLowerCase() === typeFilter.toLowerCase()
+        let sizeMB = f.size / (1024 * 1024)
+        let matchSize = !sizeFilter || (sizeFilter === '1' && sizeMB < 1) || 
+                        (sizeFilter === '5' && sizeMB >= 1 && sizeMB <= 5) ||
+                        (sizeFilter === '10' && sizeMB > 5)
+        return matchType && matchSize
+      })
 
-        if (fileTypeFilter) {
-          matchType = file.filetype.toLowerCase() === fileTypeFilter.toLowerCase();
-        }
+      fileList.innerHTML = ''
 
-        if (fileSizeFilter) {
-          const sizeInMB = file.size / (1024 * 1024);
-          if (fileSizeFilter === '1') {
-            matchSize = sizeInMB < 1;
-          } else if (fileSizeFilter === '5') {
-            matchSize = sizeInMB >= 1 && sizeInMB <= 5;
-          } else if (fileSizeFilter === '10') {
-            matchSize = sizeInMB > 5;
-          }
-        }
+      filtered.forEach((f, i) => {
+        const div = document.createElement('div')
+        div.className = 'glass p-6 rounded-lg flex justify-between items-start'
 
-        return matchType && matchSize;
-      });
+        const isCode = ['js','html','py','css','json','ts','java','cpp','c','cs'].includes(f.filetype.toLowerCase())
+        let preview = isCode ? `<button onclick="previewCode('${f.filename}')" class="ml-2 underline text-sm text-blue-400">Preview</button>` : ''
 
-      const listContainer = document.getElementById('fileList');
-      listContainer.innerHTML = '';
-
-      filteredFiles.forEach(file => {
-        const fileDiv = document.createElement('div');
-        fileDiv.className = 'glass p-6 rounded-lg flex justify-between items-center';
-        fileDiv.innerHTML = `
+        div.innerHTML = `
           <div>
-            <h3 class="font-bold text-lg text-indigo-300">${file.title}</h3>
-            <p class="text-sm text-gray-400">Author: ${file.author}</p>
-            <p class="text-sm text-gray-400">Tipe: ${file.filetype}</p>
-            <p class="text-sm text-gray-400">Ukuran: ${(file.size / 1024).toFixed(2)} KB</p>
+            <h3 class="text-lg font-bold text-indigo-300">${f.title}</h3>
+            <p class="text-sm text-gray-400">Author: ${f.author}</p>
+            <p class="text-sm text-gray-400">Tipe: ${f.filetype.toUpperCase()}</p>
+            <p class="text-sm text-gray-400">Ukuran: ${(f.size / 1024).toFixed(2)} KB</p>
+            ${preview}
           </div>
-          <a href="/uploads/${file.filename}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded glow transition" download>
-            Download
-          </a>
-          <button class="btn-share" onclick="showShareModal('/uploads/${file.filename}')">Share</button>
-        `;
-        listContainer.appendChild(fileDiv);
-      });
+          <div class="flex flex-col gap-2">
+            <a href="/uploads/${f.filename}" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded text-white text-sm glow" download>Download</a>
+            <button onclick="showShare('${f.filename}')" class="bg-white text-black px-4 py-1 text-sm rounded">Share</button>
+          </div>
+        `
+        fileList.appendChild(div)
+      })
     }
-    function showShareModal(fileUrl) {
-      const shareModal = document.getElementById('shareModal');
-      const shareInput = document.getElementById('shareInput');
-      shareInput.value = window.location.origin + fileUrl;
-      shareModal.classList.remove('hidden');
+
+    function showShare(filename) {
+      const url = `${location.origin}/uploads/${filename}`
+      shareUrlInput.value = url
+      shareModal.classList.remove('hidden')
     }
-    document.getElementById('closeModal').addEventListener('click', () => {
-      document.getElementById('shareModal').classList.add('hidden');
-    });
-    document.getElementById('copyButton').addEventListener('click', () => {
-      const shareInput = document.getElementById('shareInput');
-      shareInput.select();
-      document.execCommand('copy');
-    });
-    document.getElementById('fileTypeFilter').addEventListener('change', loadFiles);
-    document.getElementById('fileSizeFilter').addEventListener('change', loadFiles);
-    loadFiles();
+
+    function copyShareUrl() {
+      navigator.clipboard.writeText(shareUrlInput.value)
+    }
+
+    closeShare.onclick = () => shareModal.classList.add('hidden')
+
+    function previewCode(filename) {
+      window.open(`/uploads/${filename}`, '_blank')
+    }
+
+    fileTypeFilter.onchange = loadFiles
+    fileSizeFilter.onchange = loadFiles
+    loadFiles()
   </script>
 </body>
 </html>
