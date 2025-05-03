@@ -82,6 +82,22 @@ app.delete('/files/:id', async (req, res) => {
     res.status(404).send('File not found')
   }
 })
+app.get('/files/preview/:id', async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).send('File not found');
+    
+    const filepath = path.join(__dirname, 'uploads', file.filename);
+    if (fs.existsSync(filepath)) {
+      const fileContent = fs.readFileSync(filepath, 'utf-8'); // membaca konten file
+      res.send(fileContent); // mengirimkan isi file ke client
+    } else {
+      res.status(404).send('File not found');
+    }
+  } catch (error) {
+    res.status(500).send('Error reading file');
+  }
+});
 
 
 app.listen(PORT, () => {
