@@ -44,6 +44,9 @@ const upload = multer({ storage })
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
+app.get('/edit', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'edit.html'))
+})
 
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'))

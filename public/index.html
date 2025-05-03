@@ -11,10 +11,13 @@
     .glow:hover { box-shadow: 0 0 12px #4f46e5; }
   </style>
 </head>
-<body class="bg-gray-900 text-white p-6 min-h-screen">
+<body class="bg-gray-900 text-white p-6 min-h-screen relative">
+  <!-- Tombol Editor di pojok kanan atas -->
+  <a href="/edit/" class="absolute top-4 right-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded glow text-sm flex items-center gap-2">
+    <i class="fas fa-code"></i> Editor
+  </a>
 
   <h1 class="text-3xl font-bold text-indigo-400 mb-6">DAFTAR FILE OPEN SOURCE</h1>
-
   <div class="flex space-x-4 mb-6">
     <select id="fileTypeFilter" class="p-2 rounded text-black">
       <option value="">Semua Jenis</option>
@@ -31,9 +34,7 @@
       <option value="10">Lebih dari 5MB</option>
     </select>
   </div>
-
   <div id="fileList" class="space-y-4"></div>
-
   <div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white text-black p-6 rounded-lg w-96 relative">
       <button id="closeShare" class="absolute top-2 right-3 text-xl text-gray-600">X</button>
@@ -46,7 +47,6 @@
       </div>
     </div>
   </div>
-
   <script>
     const fileList = document.getElementById('fileList')
     const fileTypeFilter = document.getElementById('fileTypeFilter')
@@ -60,7 +60,6 @@
       const files = await res.json()
       const typeFilter = fileTypeFilter.value
       const sizeFilter = fileSizeFilter.value
-
       const filtered = files.filter(f => {
         let matchType = !typeFilter || f.filetype.toLowerCase() === typeFilter.toLowerCase()
         let sizeMB = f.size / (1024 * 1024)
@@ -71,25 +70,26 @@
       })
 
       fileList.innerHTML = ''
-
       filtered.forEach((f, i) => {
         const div = document.createElement('div')
         div.className = 'glass p-6 rounded-lg flex justify-between items-start'
-
         const isCode = ['js','html','py','css','json','ts','java','cpp','c','cs'].includes(f.filetype.toLowerCase())
-        let preview = isCode ? `<button onclick="previewCode('${f.filename}')" class="ml-2 underline text-sm text-blue-400">Preview</button>` : ''
-
+        let preview = isCode ? `<button onclick="previewCode('${f.filename}')" class="ml-2 underline text-sm text-blue-400"><i class="fas fa-eye"></i> Preview</button>` : ''
         div.innerHTML = `
           <div>
             <h3 class="text-lg font-bold text-indigo-300">${f.title}</h3>
-            <p class="text-sm text-gray-400">Author: ${f.author}</p>
-            <p class="text-sm text-gray-400">Tipe: ${f.filetype.toUpperCase()}</p>
-            <p class="text-sm text-gray-400">Ukuran: ${(f.size / 1024).toFixed(2)} KB</p>
+            <p class="text-sm text-gray-400"><i class="fas fa-user"></i> Author: ${f.author}</p>
+            <p class="text-sm text-gray-400"><i class="fas fa-file-alt"></i> Tipe: ${f.filetype.toUpperCase()}</p>
+            <p class="text-sm text-gray-400"><i class="fas fa-weight-hanging"></i> Ukuran: ${(f.size / 1024).toFixed(2)} KB</p>
             ${preview}
           </div>
           <div class="flex flex-col gap-2">
-            <a href="/uploads/${f.filename}" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded text-white text-sm glow" download>Download</a>
-            <button onclick="showShare('${f.filename}')" class="bg-white text-black px-4 py-1 text-sm rounded">Share</button>
+            <a href="/uploads/${f.filename}" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded text-white text-sm glow flex items-center justify-center gap-2" download>
+              <i class="fas fa-download"></i> Download
+            </a>
+            <button onclick="showShare('${f.filename}')" class="bg-white text-black px-4 py-1 text-sm rounded flex items-center justify-center gap-2">
+              <i class="fas fa-share-alt"></i> Share
+            </button>
           </div>
         `
         fileList.appendChild(div)

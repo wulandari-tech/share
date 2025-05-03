@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Awan</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+  <script src="https://unpkg.com/scrollreveal"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+  <script src="https://kit.fontawesome.com/5c774d3d52.js" crossorigin="anonymous"></script>
+    <audio autoplay="autoplay" hidden="hidden" src="https://files.catbox.moe/w2i31u.mp3"></audio>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      padding: 50px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 20px cyan;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin: 0;
+      color: cyan;
+      text-shadow: 0 0 15px cyan;
+    }
+
+    nav button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: transparent;
+      border: 2px solid cyan;
+      color: cyan;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    nav button:hover {
+      background: cyan;
+      color: #000;
+    }
+
+    section {
+      padding: 60px 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      margin: 20px 0;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #00ffe0;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+      transition: 0.3s;
+    }
+
+    .glow {
+      text-shadow: 0 0 15px #00ffe0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #00000055;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><i class="fas fa-cloud"></i>WANZOFC V2</h1>
+    <nav>
+      <button onclick="scrollToSection('tentang')">Tentang</button>
+      <button onclick="scrollToSection('projek')">Projek</button>
+      <button onclick="scrollToSection('kontak')">Kontak</button>
+    </nav>
+  </header>
+  <div id="particles-js" style="position: fixed; width: 100%; height: 100%; z-index: -1;"></div>
+  <section id="tentang">
+    <div class="card" data-aos="fade-up">
+      <h2 class="glow">Tentang Saya</h2>
+      <p>saya adalah pengembang eksplorasi AI dan antarmuka</p>
+    </div>
+  </section>
+  <section id="projek">
+    <div class="card" data-aos="zoom-in">
+      <h2 class="glow">Projek Terkini</h2>
+      <ul>
+        <li>Bot Telegram </li>
+        <li>Website film menggunakan API TMDB</li>
+        <li>Dashboard/li>
+      </ul>
+    </div>
+  </section>
+  <section id="kontak">
+    <div class="card" data-aos="flip-left">
+      <h2 class="glow">Hubungi Saya</h2>
+      <p>Email: <span style="color: cyan;">wanzbrayy010308@gmail.com</span></p>
+      <p>Telegram: <span style="color: cyan;">@wanzofc</span></p>
+      <button onclick="alert('Menghubungi Awan...')">Kirim Pesan</button>
+    </div>
+  </section>
+  <footer>
+    &copy; wanzofc v2
+  </footer>
+  <script>
+    AOS.init();
+    ScrollReveal().reveal('.card', { delay: 200 });
+    
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 60 },
+        color: { value: "#00ffff" },
+        shape: { type: "circle" },
+        opacity: { value: 0.5 },
+        size: { value: 4 },
+        move: { speed: 2 }
+      }
+    });
+
+    VanillaTilt.init(document.querySelectorAll(".card"), {
+      max: 15,
+      speed: 400
+    });
+
+    var typed = new Typed("h1", {
+      strings: ["portofolio awan", "wanzofc v2", "siap menggebrak dunia digital!"],
+      typeSpeed: 60,
+      backSpeed: 40,
+      loop: true
+    });
+
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>

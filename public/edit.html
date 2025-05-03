@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TEMPLATE SOURCE FILE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" />
+  <style>
+    /* Styles for the editor, buttons, and other UI components */
+    #editor {
+      width: 100%;
+      height: 300px;
+      margin-bottom: 20px;
+    }
+    .CodeMirror {
+      height: 300px;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    #preview {
+      width: 100%;
+      height: 300px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+    body.dark-mode {
+      background-color: #121212;
+      color: white;
+    }
+    .button-container {
+      margin-bottom: 20px;
+      margin-top: 10px;
+    }
+    .button-container button {
+      margin-right: 10px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .button-container button#toggleTheme { background-color: #f1c40f; color: #fff; }
+    .button-container button#toggleTheme:hover { background-color: #f39c12; transform: scale(1.1); }
+    .button-container button#undo { background-color: #3498db; color: #fff; }
+    .button-container button#undo:hover { background-color: #2980b9; transform: scale(1.1); }
+    .button-container button#redo { background-color: #2ecc71; color: #fff; }
+    .button-container button#redo:hover { background-color: #27ae60; transform: scale(1.1); }
+    .button-container button#exportBtn { background-color: #e74c3c; color: #fff; }
+    .button-container button#exportBtn:hover { background-color: #c0392b; transform: scale(1.1); }
+    .button-container button#importBtn { background-color: #9b59b6; color: #fff; }
+    .button-container button#importBtn:hover { background-color: #8e44ad; transform: scale(1.1); }
+    .button-container button#formatBtn { background-color: #16a085; color: #fff; }
+    .button-container button#formatBtn:hover { background-color: #13856b; transform: scale(1.1); }
+    .button-container select {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      transition: border-color 0.3s ease;
+    }
+    .button-container select:hover { border-color: #3498db; }
+    #header {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .list-item {
+      font-size: 18px;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #ecf0f1;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .list-item:hover {
+      background-color: #bdc3c7;
+      transform: scale(1.05);
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div id="header">EDITOR FILE SOURCE</div>
+<div class="list-item">HTML</div>
+<div class="list-item">CSS</div>
+<div class="list-item">JavaScript</div>
+<div class="button-container">
+  <select id="themeSelector">
+    <option value="dracula">Dracula</option>
+    <option value="default">Default</option>
+    <option value="monokai">Monokai</option>
+  </select>
+  <button id="toggleTheme"><i class="fas fa-sun"></i> / <i class="fas fa-moon"></i>Gelap</button>
+  <button id="undo"><i class="fas fa-undo"></i> Undo</button>
+  <button id="redo"><i class="fas fa-redo"></i> Redo</button>
+  <button id="exportBtn"><i class="fas fa-download"></i> Export</button>
+  <button id="importBtn"><i class="fas fa-upload"></i> Import</button>
+  <button id="formatBtn"><i class="fas fa-magic"></i> Auto Format</button>
+  <input type="file" id="fileInput" style="display: none;">
+</div>
+<textarea id="code" name="code">
+// ISI KODE KALIAN
+// C: WFC
+</textarea>
+<iframe id="preview" name="preview"></iframe>
+
+<!-- Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify-html.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify-css.min.js"></script>
+
+<script>
+  var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    lineNumbers: true,
+    mode: "htmlmixed",
+    theme: "dracula",
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    styleActiveLine: true,
+    lineWrapping: false,
+    scrollbarStyle: "native"
+  });
+
+  function updatePreview() {
+    var content = editor.getValue();
+    var iframe = document.getElementById("preview");
+    iframe.srcdoc = content;
+  }
+
+  editor.on("change", updatePreview);
+  updatePreview();
+
+  particlesJS("preview", {
+    particles: {
+      number: { value: 50, density: { enable: true, value_area: 800 } },
+      color: { value: "#ffffff" },
+      shape: { type: "circle", stroke: { width: 0, color: "#000000" }, polygon: { nb_sides: 5 } },
+      opacity: { value: 0.5, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+      size: { value: 3, random: true, anim: { enable: true, speed: 1, size_min: 0.1, sync: false } },
+      line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 },
+      move: { enable: true, speed: 6, out_mode: "out" }
+    },
+    interactivity: {
+      detect_on: "canvas",
+      events: {
+        onhover: { enable: true, mode: "repulse" },
+        onclick: { enable: true, mode: "push" },
+        resize: true
+      }
+    },
+    retina_detect: true
+  });
+
+  gsap.from("#preview", { opacity: 0, duration: 2, y: -50 });
+
+  document.getElementById("undo").addEventListener("click", () => editor.undo());
+  document.getElementById("redo").addEventListener("click", () => editor.redo());
+  document.getElementById("themeSelector").addEventListener("change", function () {
+    editor.setOption("theme", this.value);
+  });
+  document.getElementById("toggleTheme").addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+  });
+  document.getElementById("exportBtn").addEventListener("click", function () {
+    const content = editor.getValue();
+    const blob = new Blob([content], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "WANZOFC.html";
+    link.click();
+  });
+  document.getElementById("importBtn").addEventListener("click", () => {
+    document.getElementById("fileInput").click();
+  });
+  document.getElementById("fileInput").addEventListener("change", function (e) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      editor.setValue(e.target.result);
+    };
+    reader.readAsText(e.target.files[0]);
+  });
+
+  document.getElementById("formatBtn").addEventListener("click", () => {
+    const currentMode = editor.getOption("mode");
+    let formatted = editor.getValue();
+
+    if (currentMode === "htmlmixed") {
+      formatted = html_beautify(formatted);
+    } else if (currentMode === "javascript") {
+      formatted = js_beautify(formatted);
+    } else if (currentMode === "css") {
+      formatted = css_beautify(formatted);
+    }
+
+    editor.setValue(formatted);
+  });
+
+  // Avatar Upload and Chat Handling
+  const avatarInput = document.getElementById('avatarInput');
+  const chatContainer = document.getElementById('chatContainer');
+  const userNameInput = document.getElementById('userNameInput');
+  const sendButton = document.getElementById('sendButton');
+  let userName = localStorage.getItem('userName') || 'Anonymous';
+
+  function updateChat(message, avatar) {
+    const chatMessage = document.createElement('div');
+    chatMessage.className = 'chatMessage';
+    chatMessage.innerHTML = `<img src="${avatar}" class="avatar" /> <strong>${userName}:</strong> ${message}`;
+    chatContainer.appendChild(chatMessage);
+  }
+
+  sendButton.addEventListener('click', () => {
+    const message = document.getElementById('messageInput').value;
+    if (message) {
+      updateChat(message, avatarInput.files[0] || 'default-avatar.png');
+      socket.emit('newChatMessage', { userName, message, avatar: avatarInput.files[0] || 'default-avatar.png' });
+    }
+  });
+
+  socket.on('chatMessage', (data) => {
+    updateChat(data.message, data.avatar);
+  });
+</script>
+</body>
+</html>
