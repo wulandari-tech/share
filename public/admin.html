@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADMIN DASH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f172a;
+      color: white;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center px-4 py-8">
+  <h1 class="text-3xl font-semibold mb-6">Admin Upload Panel</h1>
+  <form id="uploadForm" class="w-full max-w-xl glass rounded-2xl p-6 space-y-4">
+    <input required name="title" type="text" placeholder="Judul File" class="w-full p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400" />
+    <input required name="author" type="text" placeholder="Nama Author" class="w-full p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400" />
+    <input required name="file" type="file" class="w-full p-3 bg-gray-800 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-500 file:text-white hover:file:bg-indigo-600" />
+    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg font-semibold">Upload File</button>
+  </form>
+
+  <div class="w-full max-w-6xl mt-10">
+    <h2 class="text-2xl mb-4 font-semibold">daftar file</h2>
+    <div id="fileList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    </div>
+  </div>
+<script>
+  async function fetchFiles() {
+    const res = await fetch('/files');
+    const files = await res.json();
+    const list = document.getElementById('fileList');
+    list.innerHTML = '';
+    files.forEach(file => {
+      const li = document.createElement('li');
+      li.className = "mb-2 bg-gray-800 p-3 rounded flex justify-between items-center";
+      li.innerHTML = `
+        <div>
+          <strong>${file.title}</strong> oleh <em>${file.author}</em><br>
+          <small>${file.filetype}, ${(file.size / 1024).toFixed(2)} KB</small>
+        </div>
+        <button onclick="deleteFile('${file._id}')" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white">Hapus</button>
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  async function deleteFile(id) {
+    if (confirm('Yakin ingin menghapus file ini?')) {
+      const res = await fetch(`/delete/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        alert('File berhasil dihapus');
+        fetchFiles(); // refresh list
+      } else {
+        alert('Gagal menghapus file');
+      }
+    }
+  }
+  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const res = await fetch('/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (res.ok) {
+      alert('File berhasil di-upload');
+      form.reset();
+      fetchFiles();
+    } else {
+      alert('Gagal upload file');
+    }
+  });
+  fetchFiles();
+</script>
+</body>
+</html>

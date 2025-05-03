@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>FILE SHARE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script> 
+  <style>
+    body {
+      background: linear-gradient(to right, #0f172a, #1e293b);
+      color: #f8fafc;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+    .glow:hover {
+      box-shadow: 0 0 12px #4f46e5;
+    }
+    input[type="text"] {
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 8px;
+      width: 80%;
+    }
+    .btn-share {
+      background-color: #4f46e5;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 5px;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    .btn-share:hover {
+      background-color: #4338ca;
+    }
+    .modal-content {
+      background-color: #000;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 100%;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #f87171;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="p-6 min-h-screen">
+  <h1 class="text-3xl font-bold text-indigo-400 mb-6">Daftar File untuk Diunduh</h1>
+  <div class="flex space-x-4 mb-6">
+    <div>
+      <label for="fileTypeFilter" class="block text-sm font-medium text-gray-300">Jenis File</label>
+      <select id="fileTypeFilter" class="p-2 rounded text-gray-900">
+        <option value="">Semua Jenis</option>
+        <option value="pdf">PDF</option>
+        <option value="docx">DOCX</option>
+        <option value="application/zip">ZIP</option>
+        <option value="txt">TXT</option>
+      </select>
+    </div>
+    <div>
+      <label for="fileSizeFilter" class="block text-sm font-medium text-gray-300">Ukuran File</label>
+      <select id="fileSizeFilter" class="p-2 rounded text-gray-900">
+        <option value="">Semua Ukuran</option>
+        <option value="1">Kurang dari 1MB</option>
+        <option value="5">1MB - 5MB</option>
+        <option value="10">Lebih dari 5MB</option>
+      </select>
+    </div>
+  </div>
+<div id="fileList" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- File card akan di-render di sini -->
+  </div>
+  <div id="shareModal" class="hidden fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+    <div class="modal-content">
+      <!-- Tombol Close -->
+      <button id="closeModal" class="modal-close text-right">
+        <i class="fas fa-times"></i>
+      </button>
+      <h3 class="text-lg font-bold text-gray-700 mb-4">Bagikan File</h3>
+      <input id="shareInput" type="text" class="w-full mb-4" readonly />
+      <button id="copyButton" class="btn-share flex items-center justify-center space-x-2">
+        <i class="fas fa-copy"></i>
+        <span>Salin URL</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    async function loadFiles() {
+      const res = await fetch('/files');
+      const files = await res.json();
+      const fileTypeFilter = document.getElementById('fileTypeFilter').value;
+      const fileSizeFilter = document.getElementById('fileSizeFilter').value;
+
+      const filteredFiles = files.filter(file => {
+        let matchType = true;
+        let matchSize = true;
+
+        if (fileTypeFilter) {
+          matchType = file.filetype.toLowerCase() === fileTypeFilter.toLowerCase();
+        }
+
+        if (fileSizeFilter) {
+          const sizeInMB = file.size / (1024 * 1024);
+          if (fileSizeFilter === '1') {
+            matchSize = sizeInMB < 1;
+          } else if (fileSizeFilter === '5') {
+            matchSize = sizeInMB >= 1 && sizeInMB <= 5;
+          } else if (fileSizeFilter === '10') {
+            matchSize = sizeInMB > 5;
+          }
+        }
+
+        return matchType && matchSize;
+      });
+
+      const listContainer = document.getElementById('fileList');
+      listContainer.innerHTML = '';
+
+      filteredFiles.forEach(file => {
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'glass p-6 rounded-lg flex justify-between items-center';
+        fileDiv.innerHTML = `
+          <div>
+            <h3 class="font-bold text-lg text-indigo-300">${file.title}</h3>
+            <p class="text-sm text-gray-400">Author: ${file.author}</p>
+            <p class="text-sm text-gray-400">Tipe: ${file.filetype}</p>
+            <p class="text-sm text-gray-400">Ukuran: ${(file.size / 1024).toFixed(2)} KB</p>
+          </div>
+          <a href="/uploads/${file.filename}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded glow transition" download>
+            Download
+          </a>
+          <button class="btn-share" onclick="showShareModal('/uploads/${file.filename}')">Share</button>
+        `;
+        listContainer.appendChild(fileDiv);
+      });
+    }
+    function showShareModal(fileUrl) {
+      const shareModal = document.getElementById('shareModal');
+      const shareInput = document.getElementById('shareInput');
+      shareInput.value = window.location.origin + fileUrl;
+      shareModal.classList.remove('hidden');
+    }
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('shareModal').classList.add('hidden');
+    });
+    document.getElementById('copyButton').addEventListener('click', () => {
+      const shareInput = document.getElementById('shareInput');
+      shareInput.select();
+      document.execCommand('copy');
+    });
+    document.getElementById('fileTypeFilter').addEventListener('change', loadFiles);
+    document.getElementById('fileSizeFilter').addEventListener('change', loadFiles);
+    loadFiles();
+  </script>
+</body>
+</html>
